@@ -1,0 +1,19 @@
+SENSOR BASED SHOPPING ASSISTANCE SYSTEM FOR PWDs
+
+
+Steps involved in working(IOT):
+
+Step 1: Install Blynk app.
+step 2: Make sure the device is connected with the app.
+Step 3: Scan the RFID card in the RFID reader.
+Step 4: Ultrasonic sensor will detect the obstacles.
+
+
+
+Output:
+
+Notifications will be given on the following status:
+•	RFID card scanning
+•	Obstacle detection
+
+

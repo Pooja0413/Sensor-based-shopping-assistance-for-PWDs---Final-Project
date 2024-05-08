@@ -1,0 +1,185 @@
+
+#define voice1 D0
+#define voice2 D3
+#define voice3 D7
+#define voice4 D8
+
+#define BLYNK_PRINT Serial
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+
+int trigPin = D6;    // Trigger
+int echoPin = D5;    // Echo
+long duration, cm, inches;
+
+
+#define BLYNK_TEMPLATE_ID "TMPL39As4II1V"
+#define BLYNK_TEMPLATE_NAME "SMART TROLLEY"
+#define BLYNK_AUTH_TOKEN "r1M1RuNqDLpXilrwnuKH0EwYZZjeYiGe"
+
+#include <LCD_I2C.h>
+
+LCD_I2C lcd(0x27);
+int count = 0;                                          // count = 0
+char input[12];
+char readert[]= "540026363175"; 
+char readerb[]="4D00856A63C1"; 
+char readerm[]="4D008B4FED64";
+boolean flag = 0;                                       // flag =0
+
+//
+const char* ssid     = "IOT"; 
+const char* password = "123456789";// flag =0
+
+char auth[]=BLYNK_AUTH_TOKEN;
+
+
+void setup()
+{
+    Serial.begin(9600); 
+    pinMode(voice1, OUTPUT);
+    pinMode(voice2, OUTPUT);
+    pinMode(voice3, OUTPUT);
+    pinMode(voice4, OUTPUT);
+    
+    pinMode(trigPin, OUTPUT);
+    pinMode(echoPin, INPUT);
+    lcd.begin(); 
+    lcd.backlight();
+    
+        digitalWrite(voice1,HIGH);
+digitalWrite(voice2,HIGH);
+            digitalWrite(voice3,HIGH);
+digitalWrite(voice4,HIGH);
+    
+     lcd.setCursor(0, 0);
+     lcd.print("Automatic"); // You can make spaces using well... spaces
+    lcd.setCursor(0, 1); // Or setting the cursor in the desired position.
+    lcd.print("Shopping cart");
+    Blynk.begin(auth, ssid, password, "blynk.cloud", 80);
+   lcd.clear();
+}
+void loop()
+{
+    
+      
+      Blynk.run();
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(5);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  pinMode(echoPin, INPUT);
+  duration = pulseIn(echoPin, HIGH);
+ 
+  // Convert the time into a distance
+  cm = (duration/2) / 29.1;     // Divide by 29.1 or multiply by 0.0343
+  inches = (duration/2) / 74; 
+
+
+     delay(500);
+   lcd.setCursor(0,0);
+   lcd.print("CM:"); // You can make spaces using well... spaces
+   if(cm<=9){lcd.print("00");lcd.print(cm);}
+   else if(cm<=99){lcd.print("0");lcd.print(cm);}
+   else if(cm<=999){lcd.print("");lcd.print(cm);}
+     Blynk.virtualWrite(V2,cm);
+   if(cm>1&&cm<6)
+   {
+    digitalWrite(voice1,LOW);
+    Serial.print("person detected  : ");
+    Blynk.virtualWrite(V3,"PERSON DETECTED ");
+    Blynk.logEvent("msg","PERSON DETECTED ");
+   lcd.setCursor(0, 0); 
+   lcd.print("PERSON  "); 
+   lcd.setCursor(0, 1); // Or setting the cursor in the desired position.
+   lcd.print("DETECTED  ");
+   delay(2000);
+   lcd.clear();
+   }
+    else
+    {
+       digitalWrite(voice1,HIGH);
+         Blynk.virtualWrite(V3,"                    "); 
+    }
+Serial.print("cm1  : ");
+Serial.println(cm);
+   if(Serial.available())
+   {
+      count = 0;
+      while(Serial.available() && count < 12)          // Read 12 characters and store them in input array
+      {
+         input[count] = Serial.read();
+         count++;
+         delay(5);
+      }
+      Serial.print(input);                             // Print RFID tag number 
+      
+   }
+      if(strncmp(input,readert,12) == 0)
+      {
+          digitalWrite(voice2,LOW);
+      lcd.setCursor(0, 0); // Or setting the cursor in the desired position.
+      lcd.print("OIL    ");
+      lcd.setCursor(0, 1); // Or setting the cursor in the desired position.
+      lcd.print("1 LITRE  140Rs");// You can make spaces using well... spaces
+      Blynk.virtualWrite(V0,"OIL ");
+        Blynk.virtualWrite(V1,"1 LITRE  140Rs");
+          Blynk.logEvent("msg","1 LITRE  140Rs");
+     delay(2000);
+          input[5]='5';
+          lcd.clear();
+      digitalWrite(voice2,HIGH);
+           Blynk.virtualWrite(V0,"              ");
+         Blynk.virtualWrite(V1,"                ");
+ 
+      }
+
+
+ //RFID 2 .......................................     
+   else  if(strncmp(input,readerb,12) == 0)
+      {
+ 
+      Serial.println("Card 2 Detected");
+       digitalWrite(voice3,LOW);
+      lcd.setCursor(0, 0); // Or setting the cursor in the desired position.
+      lcd.print("SALT    ");
+      lcd.setCursor(0, 1); // Or setting the cursor in the desired position.
+      lcd.print("1kg  40Rs");// You can make spaces using well... spaces
+      Blynk.virtualWrite(V0,"SALT");
+        Blynk.virtualWrite(V1,"1kg  40Rs");
+          Blynk.logEvent("msg","SALT 1kg  40Rs");
+     delay(2000);
+          input[0]='5';
+          lcd.clear();
+      digitalWrite(voice3,HIGH);
+           Blynk.virtualWrite(V0,"          ");
+         Blynk.virtualWrite(V1,"            ");
+ 
+         }
+
+
+
+ //RFID 3 .......................................     
+  else if(strncmp(input,readerm,12) == 0)
+      {
+     
+     Serial.println("Card 3 Detected");
+           digitalWrite(voice4,LOW);
+     lcd.setCursor(0, 0); // Or setting the cursor in the desired position.
+     lcd.print("SUGAR     "); // You can make spaces using well... spaces
+        lcd.setCursor(0, 1); // Or setting the cursor in the desired position.
+      lcd.print("1kg  30Rs");
+     Blynk.virtualWrite(V0,"SUGAR");
+         Blynk.virtualWrite(V1,"1kg  30Rs");
+          Blynk.logEvent("msg","SUGAR 1kg  30Rs");
+ 
+            delay(2000);
+                lcd.clear();
+                 input[0]='5';
+      digitalWrite(voice4,HIGH);
+           Blynk.virtualWrite(V0,"          ");
+         Blynk.virtualWrite(V1,"            ");
+         }
+
+}
